@@ -1,46 +1,78 @@
 const express = require('express');
-const mongoose = require('mongoose');
-const JasaMarga = require('./models/data'); // Import the Mongoose model
+const { get } = require('@vercel/edge-config'); // Import 'get' function from @vercel/edge-config
 const app = express();
 const port = 3000;
 
-// Connect to MongoDB
-mongoose.connect('https://ap-southeast-1.aws.data.mongodb-api.com/app/data-fvoehuf/endpoint/data/v1', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-});
+// Data temporary storage (will be reset on server restart)
+let data = {};
 
-// Handle connection events
-const db = mongoose.connection;
-db.on('error', console.error.bind(console, 'MongoDB connection error:'));
-db.once('open', () => {
-  console.log('Connected to MongoDB');
-});
+// Middleware to fetch configuration from Vercel Edge Config
+app.use(async (req, res, next) => {
+  try {
+    // Get configuration values from Vercel Edge Config
+    const editId = await get('editId');
+    const deleteId = await get('deleteId');
 
-app.use(express.json());
+    req.editId = editId; // Store editId in request object for use in endpoints
+    req.deleteId = deleteId; // Store deleteId in request object for use in endpoints
+
+    next();
+  } catch (error) {
+    console.error('Error fetching configuration from Vercel Edge Config:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
 
 // Endpoint to add new data (create operation)
-app.post('/api/addData', async (req, res) => {
+app.post('/api/addData', (req, res) => {
+  const { id, nama, link } = req.body;
+
+  // Add new data to temporary storage
+  data[id] = { nama, link };
+
+  res.json({ message: 'Data added successfully', data: data[id] });
+});
+
+// Endpoint to edit data
+app.put('/api/editData/:id', (req, res) => {
+  const { id } = req.params;
   const { nama, link } = req.body;
 
-  try {
-    // Create a new JasaMarga document using the provided data
-    const newData = await JasaMarga.create({ nama, link });
-    res.json(newData);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+  // Check if the provided ID matches the editId from Vercel Edge Config
+  if (id !== req.editId) {
+    return res.status(403).json({ message: 'Forbidden' });
+  }
+
+  // Update data in temporary storage
+  if (data[id]) {
+    data[id] = { nama, link };
+    res.json({ message: 'Data updated successfully', data: data[id] });
+  } else {
+    res.status(404).json({ message: 'Data not found' });
+  }
+});
+
+// Endpoint to delete data
+app.delete('/api/deleteData/:id', (req, res) => {
+  const { id } = req.params;
+
+  // Check if the provided ID matches the deleteId from Vercel Edge Config
+  if (id !== req.deleteId) {
+    return res.status(403).json({ message: 'Forbidden' });
+  }
+
+  // Delete data from temporary storage
+  if (data[id]) {
+    delete data[id];
+    res.json({ message: 'Data deleted successfully' });
+  } else {
+    res.status(404).json({ message: 'Data not found' });
   }
 });
 
 // Endpoint to fetch all data (read operation)
-app.get('/api/getData', async (req, res) => {
-  try {
-    // Retrieve all JasaMarga documents from the MongoDB collection
-    const allData = await JasaMarga.find();
-    res.json(allData);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
+app.get('/api/getData', (req, res) => {
+  res.json(data);
 });
 
 // Serve the index.html file (optional)
@@ -49,6 +81,6 @@ app.get('/', (req, res) => {
 });
 
 // Start the Express server
-app.listen( () => {
-  console.log(`Server is running on https://ilam-hm-github-io.vercel.app/`);
+app.listen(port, () => {
+  console.log(`Server is running on http://localhost:${port}`);
 });

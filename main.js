@@ -1,42 +1,23 @@
 const { app, BrowserWindow } = require('electron');
-const path = require('path');
-const isDev = require('electron-is-dev');
-const axios = require('axios'); // Import Axios for making HTTP requests
+const axios = require('axios');
 
 function createWindow() {
-  const mainWindow = new BrowserWindow({
+  const win = new BrowserWindow({
     width: 800,
     height: 600,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
-      contextIsolation: true,
-      enableRemoteModule: false,
+      nodeIntegration: true
     }
   });
 
-  mainWindow.loadFile('index.html');
+  // Load the index.html file
+  win.loadFile('index.html');
 
-  if (isDev) {
-    mainWindow.webContents.openDevTools();
-  }
-
-  // Call fetchData() after the window is created
-  fetchData();
+  // Open DevTools (remove this line in production)
+  win.webContents.openDevTools();
 }
 
 app.whenReady().then(createWindow);
-
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
-});
-
-app.on('activate', () => {
-  if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow();
-  }
-});
 
 // Function to fetch data from the server using Axios
 async function fetchData() {
@@ -49,3 +30,19 @@ async function fetchData() {
     console.error('Error fetching data:', error);
   }
 }
+
+// Call fetchData function whenever needed
+fetchData();
+
+// Quit when all windows are closed, except on macOS
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') {
+    app.quit();
+  }
+});
+
+app.on('activate', () => {
+  if (BrowserWindow.getAllWindows().length === 0) {
+    createWindow();
+  }
+});
