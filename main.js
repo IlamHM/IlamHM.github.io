@@ -1,10 +1,10 @@
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
-
-let mainWindow = null;
+const isDev = require('electron-is-dev');
+const axios = require('axios'); // Import Axios for making HTTP requests
 
 function createWindow() {
-  mainWindow = new BrowserWindow({
+  const mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
     webPreferences: {
@@ -16,15 +16,16 @@ function createWindow() {
 
   mainWindow.loadFile('index.html');
 
-  mainWindow.on('closed', () => {
-    // Dereference the window object
-    mainWindow = null;
-  });
+  if (isDev) {
+    mainWindow.webContents.openDevTools();
+  }
+
+  // Call fetchData() after the window is created
+  fetchData();
 }
 
-app.on('ready', createWindow);
+app.whenReady().then(createWindow);
 
-// Quit when all windows are closed, except on macOS
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
@@ -32,8 +33,19 @@ app.on('window-all-closed', () => {
 });
 
 app.on('activate', () => {
-  // Recreate a window if mainWindow is null (e.g., when app is activated)
-  if (mainWindow === null) {
+  if (BrowserWindow.getAllWindows().length === 0) {
     createWindow();
   }
 });
+
+// Function to fetch data from the server using Axios
+async function fetchData() {
+  try {
+    const response = await axios.get('https://ilamhm.github.io/api/getData');
+    const data = response.data;
+    // Use data retrieved from the server (e.g., pass it to the renderer process)
+    console.log(data);
+  } catch (error) {
+    console.error('Error fetching data:', error);
+  }
+}

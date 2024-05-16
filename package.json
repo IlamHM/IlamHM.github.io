@@ -10,10 +10,12 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "body-parser": "^1.20.2",
-    "express": "^4.19.2"
+    "body-parser": "^1.20.2"
   },
   "devDependencies": {
-    "electron": "^30.0.6"
+    "electron": "^30.0.6",
+    "express": "^4.19.2",
+    "mongodb": "^6.6.2",
+    "mongoose": "^8.3.5"
   }
 }
