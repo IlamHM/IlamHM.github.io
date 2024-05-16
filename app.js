@@ -5,7 +5,7 @@ const app = express();
 const port = 3000;
 
 // Connect to MongoDB
-mongoose.connect('mongodb://localhost:27017/cctv_padaleunyi', {
+mongoose.connect('https://ap-southeast-1.aws.data.mongodb-api.com/app/data-fvoehuf/endpoint/data/v1', {
   useNewUrlParser: true,
   useUnifiedTopology: true
 });
