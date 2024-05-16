@@ -41,7 +41,7 @@ app.on('activate', () => {
 // Function to fetch data from the server using Axios
 async function fetchData() {
   try {
-    const response = await axios.get('https://ilamhm.github.io/api/getData');
+    const response = await axios.get('https://ilam-hm-github-io.vercel.app/api/getData');
     const data = response.data;
     // Use data retrieved from the server (e.g., pass it to the renderer process)
     console.log(data);

@@ -110,7 +110,7 @@
 
     async function fetchData() {
         try {
-            const response = await fetch('https://ilamhm.github.io/api/getData');
+            const response = await fetch('https://ilam-hm-github-io.vercel.app/api/getData');
             const data = await response.json();
             renderDataList(data);
         } catch (error) {
@@ -120,7 +120,7 @@
 
     async function addData(data) {
         try {
-            const response = await fetch('https://ilamhm.github.io/api/addData', {
+            const response = await fetch('https://ilam-hm-github-io.vercel.app/api/addData', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -136,7 +136,7 @@
 
     async function editData(data) {
         try {
-            const response = await fetch(`https://ilamhm.github.io/api/editData/${data.id}`, {
+            const response = await fetch(`https://ilam-hm-github-io.vercel.app/api/editData/${data.id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
@@ -152,7 +152,7 @@
 
     async function deleteData(id) {
         try {
-            const response = await fetch(`https://ilamhm.github.io/api/deleteData/${id}`, {
+            const response = await fetch(`https://ilam-hm-github-io.vercel.app/api/deleteData/${id}`, {
                 method: 'DELETE'
             });
             const responseData = await response.json();
